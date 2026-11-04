@@ -1,0 +1,1 @@
+"""Telegram Payments demo bot."""

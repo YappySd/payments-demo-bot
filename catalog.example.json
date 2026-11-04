@@ -1,0 +1,7 @@
+{
+  "products": [
+    {"id": "consult", "title": "Консультация 60 минут", "description": "Онлайн-созвон, разбор вашей задачи", "price": 80000, "stock": null},
+    {"id": "tee", "title": "Футболка с принтом", "description": "Хлопок, размер M", "price": 45000, "stock": 10},
+    {"id": "guide", "title": "PDF-гайд", "description": "Пошаговая инструкция, 40 страниц", "price": 19900, "stock": null}
+  ]
+}
