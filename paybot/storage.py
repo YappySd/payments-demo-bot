@@ -90,7 +90,7 @@ class Storage:
 
     def order(self, order_id: int) -> Order | None:
         with self._lock:
-            row = self._conn.execute(f"SELECT {_COLS} FROM orders WHERE id = ?", (order_id,)).fetchone()
+            row = self._conn.execute(f"SELECT {_COLS} FROM orders WHERE id = ?", (order_id,)).fetchone()  # nosec B608 - constants only, values are bound with ?
         return self._order(row) if row else None
 
     def mark_paid(self, order: Order) -> bool:
@@ -116,7 +116,7 @@ class Storage:
         return cur.rowcount == 1
 
     def orders(self, status: str | None = None, limit: int = 20) -> list[Order]:
-        sql = f"SELECT {_COLS} FROM orders" + (" WHERE status = ?" if status else "") + " ORDER BY id DESC LIMIT ?"
+        sql = f"SELECT {_COLS} FROM orders" + (" WHERE status = ?" if status else "") + " ORDER BY id DESC LIMIT ?"  # nosec B608 - constants only, values are bound with ?
         with self._lock:
             rows = self._conn.execute(sql, (status, limit) if status else (limit,)).fetchall()
         return [self._order(r) for r in rows]

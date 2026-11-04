@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from html import escape
 
 from aiogram import F, Router
 from aiogram.filters import Command, CommandStart
@@ -85,7 +86,8 @@ def build_router(service: PaymentService, provider_token: str, admin_ids: frozen
         phone = sp.order_info.phone_number if sp.order_info and sp.order_info.phone_number else "не указан"
         await notify_admin(
             f"💰 <b>Оплата</b> заказ №{order.id}\n{order.product_id} · {format_price(order.amount, order.currency)}\n"
-            f"Покупатель: {message.from_user.full_name} ({phone})"
+            # Names and phones come from the buyer; unescaped "<" would make Telegram reject the whole message.
+            f"Покупатель: {escape(message.from_user.full_name)} ({escape(phone)})"
             + ("\n🧪 тестовый режим" if test_mode else "")
         )
 

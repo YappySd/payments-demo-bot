@@ -32,7 +32,7 @@ paybot/
   bot.py       Telegram (aiogram 3): каталог, счёт, pre-checkout, successful_payment
   config.py    настройки и защита от боевого токена
   main.py      запуск
-tests/         42 теста
+tests/         43 теста
 ```
 
 В тестах Telegram и платёжного провайдера заменяет заглушка: тест сам присылает боту `pre_checkout_query` и `successful_payment`, как это делает Telegram после ввода карты, и проверяет ответы настоящего роутера aiogram.

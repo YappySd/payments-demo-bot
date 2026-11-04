@@ -57,12 +57,12 @@ class Env:
         self.dp.include_router(build_router(self.service, PROVIDER, frozenset({ADMIN}), test_mode, notify_admin))
         self.n = 0
 
-    def user(self, uid=BUYER):
-        return User(id=uid, is_bot=False, first_name="Anna")
+    def user(self, uid=BUYER, name="Anna"):
+        return User(id=uid, is_bot=False, first_name=name)
 
-    def message(self, uid=BUYER, **kw):
+    def message(self, uid=BUYER, name="Anna", **kw):
         return Message(message_id=self.n, date=datetime.now(), chat=Chat(id=uid, type="private"),
-                       from_user=self.user(uid), **kw)
+                       from_user=self.user(uid, name), **kw)
 
     async def feed(self, **update):
         self.n += 1
@@ -85,11 +85,11 @@ class Env:
         calls = await self.feed(pre_checkout_query=q)
         return next(c for c in calls if isinstance(c, AnswerPreCheckoutQuery))
 
-    async def successful_payment(self, invoice, charge="tg-charge-1", uid=BUYER):
+    async def successful_payment(self, invoice, charge="tg-charge-1", uid=BUYER, name="Anna", phone="380501234567"):
         sp = SuccessfulPayment(currency=invoice.currency, total_amount=invoice.prices[0].amount,
                                invoice_payload=invoice.payload, telegram_payment_charge_id=charge,
-                               provider_payment_charge_id="prov-" + charge, order_info=OrderInfo(phone_number="380501234567"))
-        return await self.feed(message=self.message(uid, successful_payment=sp).as_(self.bot))
+                               provider_payment_charge_id="prov-" + charge, order_info=OrderInfo(phone_number=phone))
+        return await self.feed(message=self.message(uid, name, successful_payment=sp).as_(self.bot))
 
     async def buy(self, uid=BUYER):
         calls = await self.press("buy:tee", uid)
@@ -191,3 +191,15 @@ def test_sales_report_only_for_admin():
 
 def test_main_module_imports():
     import paybot.main  # noqa: F401
+
+
+def test_buyer_name_with_html_is_escaped_for_admin():
+    async def scenario():
+        env = Env()
+        invoice = await env.buy()
+        await env.successful_payment(invoice, name="<b>Hacker</b> & Co", phone="<i>1</i>")
+        text = env.admin_msgs[-1]
+        assert "&lt;b&gt;Hacker&lt;/b&gt; &amp; Co" in text and "&lt;i&gt;1&lt;/i&gt;" in text
+        assert "<b>Hacker" not in text
+
+    run(scenario())
